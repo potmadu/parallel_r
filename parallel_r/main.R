@@ -1,6 +1,8 @@
 library(doParallel);
 library(foreach);
 
+test;
+
 input_data = read.csv('data/Airports.csv');
 packages = c();
 
