@@ -201,8 +201,22 @@ from hyperopt.pyll import scope
 import numpy as np
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
+import multiprocessing
+
+n_jobs = multiprocessing.cpu_count()-1;
 
 # XGB parameters
+xgb_model = xgb.XGBRegressor(
+	objective = 'reg:squarederror',
+	n_estimators = 100,
+	early_stopping_rounds=10,
+    learning_rate=-1,
+    max_depth=-1,
+    min_child_weight=-1,
+    colsample_bytree=-1,
+    subsample=-1
+);
+
 xgb_reg_params = {
     'learning_rate':    hp.choice('learning_rate',    np.arange(0.05, 0.31, 0.05)),
     'max_depth':        hp.choice('max_depth',        np.arange(5, 16, 1, dtype=int)),
@@ -222,13 +236,23 @@ xgb_reg_params2 = {
     'objective' : 'reg:squarederror'
 }
 
+xgb_reg_params3 = {
+    'learning_rate':    hp.loguniform('learning_rate',np.log(0.0001), np.log(0.5)) - 0.0001,
+    'max_depth':        scope.int(hp.uniform('max_depth',1, 11)),
+    'min_child_weight': scope.int(hp.loguniform('min_child_weight',np.log(1), np.log(100))),
+    'colsample_bytree': hp.uniform('colsample_bytree',0.5, 1),
+    'subsample':        hp.uniform('subsample', 0.8, 1),
+    'reg_lambda' : hp.uniform('reg_lambda', 0.1, 10),
+    'objective': "reg:squarederror"
+}
+
 xgb_fit_params = {
     'eval_metric': 'rmse',
     'early_stopping_rounds': 10,
     'verbose': False
 }
 xgb_para = dict()
-xgb_para['reg_params'] = xgb_reg_params2
+xgb_para['reg_params'] = xgb_reg_params3
 xgb_para['fit_params'] = xgb_fit_params
 xgb_para['loss_func' ] = lambda y, pred: np.sqrt(mean_squared_error(y, pred))
 
@@ -282,9 +306,25 @@ model = xgb.XGBRegressor(
 );
 
 clf = model.fit(X_train,y_train);
-
 preds = clf.predict(X_test);
-
 print(r2_score(y_test,preds));
 0.5084898349358241
 
+model = xgb.XGBRegressor(
+    colsample_bytree= 0.5973059894362318,
+    learning_rate= 0.07800506973817646,
+    max_depth= 8,
+    min_child_weight= 6.645058811826704,
+    reg_lambda= 0.711980666827622,
+    subsample= 0.9735606359488681,
+    n_estimators = 100,
+    objective = 'reg:squarederror',
+    eval_metric = 'rmse',
+    early_stopping_rounds = 10,
+    verbose = False
+);
+
+clf = model.fit(X_train,y_train);
+preds = clf.predict(X_test);
+print(r2_score(y_test,preds));
+0.5143037486255532
