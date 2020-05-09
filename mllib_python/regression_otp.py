@@ -3,6 +3,7 @@ import numpy as np;
 import xgboost as xgb;
 import itertools;
 from sklearn.preprocessing import LabelEncoder;
+from sklearn.model_selection import train_test_split;
 
 LE = LabelEncoder();
 
@@ -55,12 +56,26 @@ target = dat['X5'].copy();
 data = dat.drop('X5',1);
 dtrain = xgb.DMatrix(data,target);
 
+X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.33, random_state=12345);
+
+#################################
+
+import sklearn;
+
+model = xgb.XGBRegressor();
+model.fit(X_train,y_train);
+
+preds = model.predict(X_test);
+print(sklearn.metrics.r2_score(y_test,preds));
+0.5031847752655616
+
 #################################
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import KFold
-from sklearn.model_selection import train_test_split
 import multiprocessing
+import sklearn
+import json
 
 n_jobs = multiprocessing.cpu_count()-1;
 
@@ -96,20 +111,25 @@ xgb_model = xgb.XGBRegressor(
 	early_stopping_rounds=10
 );
 
-X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.33, random_state=12345);
-
-clf = GridSearchCV(xgb.XGBRegressor(), params_sample, n_jobs=n_jobs,
+clf = GridSearchCV(xgb_model, params_complete, n_jobs=n_jobs,
                    cv=KFold(10,True,12345),
                    scoring='r2',
                    verbose=2, refit=True);
-
 clf.fit(X_train, y_train);
 
-pred = clf.predict(X_test);
-sklearn.metrics.mean_squared_error(y_test,pred);
+[Parallel(n_jobs=7)]: Done 810 out of 810 | elapsed: 196.2min finished
+clf.best_params_
+Out[6]:
+{'learning_rate': 0.1,
+ 'max_depth': 10,
+ 'reg_lambda': 10,
+ 'subsample': 0.75,
+ 'tree_method': 'exact'}
 
-sklearn.metrics.r2_score(y_test,pred)
-Out[22]: 0.5029078009373649
+pred = clf.predict(X_test);
+print(sklearn.metrics.r2_score(y_test,pred));
+
+Out[22]: 0.5133958825622922
 
 #############################################
 
@@ -154,8 +174,6 @@ xgb_model = xgb.XGBRegressor(
 	n_estimators = 100,
 	early_stopping_rounds=10
 );
-
-X_train, X_test, y_train, y_test = train_test_split(data, target, test_size=0.33, random_state=12345);
 
 n_jobs = multiprocessing.cpu_count()-1;
 
