@@ -246,13 +246,55 @@ xgb_reg_params3 = {
     'objective': "reg:squarederror"
 }
 
+xgb_reg_params4 = {
+    'learning_rate':    hp.loguniform('learning_rate',np.log(0.0001), np.log(0.5)) - 0.0001,
+    'max_depth':        scope.int(hp.uniform('max_depth',1, 11)),
+    'min_child_weight': scope.int(hp.loguniform('min_child_weight',np.log(1), np.log(100))),
+    'colsample_bytree': hp.uniform('colsample_bytree',0.5, 1),
+    'subsample':        hp.uniform('subsample', 0.8, 1),
+    'reg_alpha' : hp.loguniform('reg_alpha', np.log(0.0001), np.log(1)) - 0.0001,
+    'reg_lambda' : hp.loguniform('reg_lambda', np.log(1), np.log(4)),
+    'colsample_bylevel' : hp.uniform('colsample_bylevel', 0.5, 1),
+    'gamma' : hp.loguniform('gamma', np.log(0.0001), np.log(5)) - 0.0001,
+    'n_estimators' : scope.int(hp.quniform('n_estimators', 100, 6000, 200)),
+    'objective': "reg:squarederror"
+}
+
+xgb_reg_params4 = {
+    'learning_rate':    hp.loguniform('learning_rate',np.log(0.0001), np.log(0.5)) - 0.0001,
+    'max_depth':        scope.int(hp.uniform('max_depth',1, 11)),
+    'min_child_weight': scope.int(hp.loguniform('min_child_weight',np.log(1), np.log(100))),
+    'colsample_bytree': hp.uniform('colsample_bytree',0.5, 1),
+    'subsample':        hp.uniform('subsample', 0.8, 1),
+    'reg_alpha' : hp.loguniform('reg_alpha', np.log(0.0001), np.log(1)) - 0.0001,
+    'reg_lambda' : hp.loguniform('reg_lambda', np.log(1), np.log(4)),
+    'colsample_bylevel' : hp.uniform('colsample_bylevel', 0.5, 1),
+    'gamma' : hp.loguniform('gamma', np.log(0.0001), np.log(5)) - 0.0001,
+    'n_estimators' : scope.int(hp.quniform('n_estimators', 100, 6000, 200)),
+    'objective': "reg:squarederror"
+}
+
+xgb_reg_params5 = {
+    'learning_rate':    hp.loguniform('learning_rate',np.log(0.0001), np.log(0.5)) - 0.0001,
+    'max_depth':        scope.int(hp.uniform('max_depth',1, 11)),
+    'min_child_weight': scope.int(hp.loguniform('min_child_weight',np.log(1), np.log(100))),
+    'colsample_bytree': hp.uniform('colsample_bytree',0.5, 1),
+    'subsample':        hp.uniform('subsample', 0.8, 1),
+    'reg_alpha' : hp.loguniform('reg_alpha', np.log(0.0001), np.log(1)) - 0.0001,
+    'reg_lambda' : hp.loguniform('reg_lambda', np.log(1), np.log(4)),
+    'colsample_bylevel' : hp.uniform('colsample_bylevel', 0.5, 1),
+    'gamma' : hp.loguniform('gamma', np.log(0.0001), np.log(5)) - 0.0001,
+    'objective': "reg:squarederror"
+}
+
 xgb_fit_params = {
     'eval_metric': 'rmse',
     'early_stopping_rounds': 10,
     'verbose': False
 }
+
 xgb_para = dict()
-xgb_para['reg_params'] = xgb_reg_params3
+xgb_para['reg_params'] = xgb_reg_params5
 xgb_para['fit_params'] = xgb_fit_params
 xgb_para['loss_func' ] = lambda y, pred: np.sqrt(mean_squared_error(y, pred))
 
@@ -328,3 +370,70 @@ clf = model.fit(X_train,y_train);
 preds = clf.predict(X_test);
 print(r2_score(y_test,preds));
 0.5143037486255532
+
+#complete params, n_estimators manual
+model = xgb.XGBRegressor(
+    colsample_bytree= 0.6189170208967911,
+    learning_rate= 0.13111224156700763,
+    max_depth= 9,
+    min_child_weight= 29.584730834846734,
+    reg_lambda= 1.1207492900800882,
+    reg_alpha= 0.0019708295918997097,
+    colsample_bylevel = 0.9224934475022007,
+    gamma = 0.0008488993556905641,
+    n_estimators= 4800,
+    subsample= 0.9929040572716057,
+    objective = 'reg:squarederror',
+    eval_metric = 'rmse',
+    early_stopping_rounds = 10,
+    verbose = False
+);
+
+clf = model.fit(X_train,y_train);
+preds = clf.predict(X_test);
+print(r2_score(y_test,preds));
+0.4333687859621018
+
+#complete params, n_estimators manual set from 4800 to 100
+model = xgb.XGBRegressor(
+    colsample_bytree= 0.6189170208967911,
+    learning_rate= 0.13111224156700763,
+    max_depth= 9,
+    min_child_weight= 29.584730834846734,
+    reg_lambda= 1.1207492900800882,
+    reg_alpha= 0.0019708295918997097,
+    colsample_bylevel = 0.9224934475022007,
+    gamma = 0.0008488993556905641,
+    n_estimators= 100,
+    subsample= 0.9929040572716057,
+    objective = 'reg:squarederror',
+    eval_metric = 'rmse',
+    early_stopping_rounds = 10,
+    verbose = False
+);
+
+clf = model.fit(X_train,y_train);
+preds = clf.predict(X_test);
+print(r2_score(y_test,preds));
+0.5159420629122465
+
+#without n_estimators
+model = xgb.XGBRegressor(
+    colsample_bytree= 0.7807834231052183,
+    learning_rate= 0.2705707875766713,
+    max_depth= 6,
+    min_child_weight= 1.5807278598676304,
+    reg_lambda= 1.0371352162796799,
+    reg_alpha= 0.08629380056240896,
+    colsample_bylevel = 0.9164597784160902,
+    gamma = 0.010246664493031186,
+    subsample= 0.8389894400633456,
+    objective = 'reg:squarederror',
+    eval_metric = 'rmse',
+    verbose = False
+);
+
+clf = model.fit(X_train,y_train);
+preds = clf.predict(X_test);
+print(r2_score(y_test,preds));
+0.5097061017628097
